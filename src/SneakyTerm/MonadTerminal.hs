@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module SneakyTerm.TerminalMonad(runTerminal,tmRender,tmCharEvent) where
+module SneakyTerm.MonadTerminal(runTerminal,tmRender,tmCharEvent) where
 
 import           ClassyPrelude              hiding ((\\))
 import           Control.Lens               (ix, makeLenses, to, use, view,
@@ -21,7 +21,7 @@ import           SneakyTerm.Rect
 import           SneakyTerm.Tile
 import qualified UI.NCurses                 as C
 
-class TerminalMonad m where
+class MonadTerminal m where
   tmRender :: [Tile] -> m ()
   tmCharEvent :: m Char
 
@@ -37,18 +37,18 @@ data TerminalData = TerminalData {
 
 $(makeLenses ''TerminalData)
 
-newtype TerminalMonadM a = TerminalMonadM {
-    runTerminalMonad :: StateT TerminalData C.Curses a
+newtype MonadTerminalM a = MonadTerminalM {
+    runMonadTerminal :: StateT TerminalData C.Curses a
   } deriving(Monad,MonadIO,MonadState TerminalData,Applicative,Functor)
 
-instance (Monad m,TerminalMonad m) => TerminalMonad (StateT n m) where
+instance (Monad m,MonadTerminal m) => MonadTerminal (StateT n m) where
   tmRender ts = lift (tmRender ts)
   tmCharEvent = lift tmCharEvent
 
-liftCurses :: C.Curses a -> TerminalMonadM a
-liftCurses  = TerminalMonadM . lift
+liftCurses :: C.Curses a -> MonadTerminalM a
+liftCurses  = MonadTerminalM . lift
 
-instance TerminalMonad TerminalMonadM where
+instance MonadTerminal MonadTerminalM where
   tmRender ts = do
       currentColors <- use tdColors
       let unassignedColors = (view tileColor <$> ts) \\ keys currentColors
@@ -91,10 +91,10 @@ drawTile colors t = do
   C.setColor (colors ^?! ix (t ^. tileColor))
   C.drawString [t ^. tileCharacter]
 
-runTerminal :: Rect Int -> TerminalMonadM () -> IO ()
+runTerminal :: Rect Int -> MonadTerminalM () -> IO ()
 runTerminal viewport a = C.runCurses $ do
   C.setEcho False
   w <- C.newWindow (viewport ^. rectHeight . to fromIntegral) (viewport ^. rectWidth . to fromIntegral) 0 0
   _ <- C.setCursorMode C.CursorInvisible
-  evalStateT (runTerminalMonad a) (TerminalData w viewport mempty mempty 1)
+  evalStateT (runMonadTerminal a) (TerminalData w viewport mempty mempty 1)
 

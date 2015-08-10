@@ -2,16 +2,28 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                sneakyterm
-version:             0.1.0.0
-synopsis:            Monad transformer for curses operations
-description:         SneakyTerm gibts you 'TerminalMonad' for efficiently rendering and updating the curses screen
-homepage:            http://github.com/sneakyterm
-license:             MIT
+version:             0.1
+synopsis:            Tiny, declarative wrapper around ncurses
+description:
+  `SneakyTerm` gives you 'MonadTerminal' which gives you two operations, 'tmRender' to render a list of tiles, and 'tmCharEvent' to wait for character input. A simple example:
+  .
+  > main = do
+  >   let viewport = rectFromOriginAndDim (V2 0 0) (V2 80 25)
+  >   runTerminal viewport $ do
+  >     tmRender [Tile (V2 10 10) '@' (ColorPair Red Blue)]
+  >     _ <- tmCharEvent
+  >     return ()
+  .
+  This will render a red `@` at column 11, line 11, with blue background.
+
+homepage:            https://github.com/pmiddend/sneakyterm
+bug-reports:         https://github.com/pmiddend/sneakyterm/issues
+license:             GPL-3
 license-file:        LICENSE
 author:              Philipp Middendorf
 maintainer:          pmidden@secure.mailbox.org
 -- copyright:           
-category:            Text
+category:            User Interfaces
 build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
@@ -22,14 +34,13 @@ source-repository head
   type: git
   location: git://github.com/pmiddend/sneakyterm.git
 
-
 library
-  exposed-modules:     SneakyTerm.TerminalMonad
-                     , SneakyTerm.Rect
-                     , SneakyTerm.ColorPair
-                     , SneakyTerm.Point
-                     , SneakyTerm.Tile
-                     , SneakyTerm.Color
+  exposed-modules:     System.Console.SneakyTerm.MonadTerminal
+                     , System.Console.SneakyTerm.Rect
+                     , System.Console.SneakyTerm.ColorPair
+                     , System.Console.SneakyTerm.PointInt
+                     , System.Console.SneakyTerm.Tile
+                     , System.Console.SneakyTerm.Color
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8
@@ -46,15 +57,15 @@ library
                     , OverloadedStrings
   ghc-options: -Wall
 
-executable example_main
-  main-is:             Main.hs
-  hs-source-dirs:      examples
-  -- other-extensions:
-  build-depends:       base >=4.7 && <4.9
-                     , sneakyterm
-                     , linear
-                     , classy-prelude
-  default-language:    Haskell2010
-  default-extensions: NoImplicitPrelude
-                    , OverloadedStrings
-  ghc-options: -Wall
+--executable example_main
+--  main-is:             Main.hs
+--  hs-source-dirs:      examples
+--  -- other-extensions:
+--  build-depends:       base >=4.7 && <4.9
+--                     , sneakyterm
+--                     , linear
+--                     , classy-prelude
+--  default-language:    Haskell2010
+--  default-extensions: NoImplicitPrelude
+--                    , OverloadedStrings
+--  ghc-options: -Wall

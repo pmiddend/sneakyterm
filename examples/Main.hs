@@ -2,14 +2,14 @@ module Main where
 
 import           ClassyPrelude
 import           Linear.V2
-import           SneakyTerm.Color
-import           SneakyTerm.ColorPair
-import           SneakyTerm.Rect
-import           SneakyTerm.TerminalMonad
-import           SneakyTerm.Tile
+import           System.Console.SneakyTerm.Color
+import           System.Console.SneakyTerm.ColorPair
+import           System.Console.SneakyTerm.Rect
+import           System.Console.SneakyTerm.MonadTerminal
+import           System.Console.SneakyTerm.Tile
 
 main :: IO ()
 main = runTerminal (rectFromOriginAndDim (V2 0 0) (V2 80 25)) $ do
-  tmRender [Tile{_tilePosition=V2 10 10,_tileCharacter='@',_tileColor=ColorPair{_cpForeground=Red,_cpBackground=Green}}]
+  tmRender [Tile (V2 10 10) '@' (ColorPair Red Green)]
   _ <- tmCharEvent
   return ()

@@ -20,6 +20,8 @@ module System.Console.SneakyTerm.Rect(
     , rectFromPoints
     , rectFromOriginAndDim
     , rectDimensions
+    , rectRightTop
+    , rectLeftBottom
     ) where
 
 import           ClassyPrelude
@@ -36,6 +38,12 @@ data Rect a = Rect {
   } deriving(Show,Eq,Functor)
 
 $(makeLenses ''Rect)
+
+rectRightTop :: Num a => Getter (Rect a) (V2 a)
+rectRightTop = to (\r -> r ^. rectLeftTop + V2 (r ^. rectWidth) 0)
+
+rectLeftBottom :: Num a => Getter (Rect a) (V2 a)
+rectLeftBottom = to (\r -> r ^. rectLeftTop + V2 0 (r ^. rectHeight))
 
 rectLeft :: Getter (Rect a) a
 rectLeft = rectLeftTop . _x

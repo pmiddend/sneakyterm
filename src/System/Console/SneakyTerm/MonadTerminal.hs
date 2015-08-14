@@ -12,6 +12,7 @@ module System.Console.SneakyTerm.MonadTerminal(
   , MonadTerminalM) where
 
 import           ClassyPrelude              hiding ((\\))
+import Data.Text.IO
 import           Control.Lens               (ix, makeLenses, to, use, view,
                                              (%=), (+=), (.=), (^.), (^?!))
 import           Control.Monad.State        (MonadState)
@@ -25,6 +26,7 @@ import           System.Console.SneakyTerm.PointInt
 import           System.Console.SneakyTerm.Rect
 import           System.Console.SneakyTerm.Tile
 import qualified UI.NCurses                 as C
+import Data.List(nub)
 
 -- | A type analogous to 'MonadState' and 'MonadReader'
 class Monad m => MonadTerminal m where
@@ -58,9 +60,11 @@ liftCurses  = MonadTerminalM . lift
 instance MonadTerminal MonadTerminalM where
   tmRender ts = do
       currentColors <- use tdColors
-      let unassignedColors = (view tileColor <$> ts) \\ keys currentColors
+      let unassignedColors = (nub ( view tileColor <$> ts) ) \\ keys currentColors
+      maxColorID' <- liftCurses $ C.maxColorID
       forM_ (toList unassignedColors) $ \c -> do
         nextColor <- use tdNextColorId
+        when (nextColor > (fromIntegral maxColorID')) (error $ "more than " <> show maxColorID' <> " colors")
         cid <- liftCurses $ C.newColorID (toCurses (c ^. cpForeground)) (toCurses (c ^. cpBackground)) (fromIntegral nextColor)
         tdNextColorId += 1
         tdColors %= insert c cid

@@ -12,7 +12,6 @@ module System.Console.SneakyTerm.MonadTerminal(
   , MonadTerminalM) where
 
 import           ClassyPrelude              hiding ((\\))
-import Data.Text.IO
 import           Control.Lens               (ix, makeLenses, to, use, view,
                                              (%=), (+=), (.=), (^.), (^?!))
 import           Control.Monad.State        (MonadState)
